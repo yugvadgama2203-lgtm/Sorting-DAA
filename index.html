@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SortLab | Interactive DAA Sorting & Graph Algorithm Suite</title>
+  <meta name="description" content="An interactive Design and Analysis of Algorithms (DAA) visualization tool featuring sorting, Prim's, Kruskal's, Dijkstra's algorithms, live pointers (low, high, mid, pivot), dual-race comparisons, sound synthesis, and recurrence analysis.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Header / Navigation Bar -->
+  <header class="app-header">
+    <div class="logo-container">
+      <div class="logo-icon">
+        <i class="fa-solid fa-chart-simple glow-icon"></i>
+      </div>
+      <div class="logo-text">
+        <h1>Sort<span>Lab</span> <span class="badge">DAA Suite</span></h1>
+        <p class="subtitle">Design & Analysis of Algorithms Visualizer</p>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="nav-btn active" data-tab="single-view">
+        <i class="fa-solid fa-play"></i> Visualizer Studio
+      </button>
+      <button class="nav-btn" data-tab="dual-race">
+        <i class="fa-solid fa-bolt"></i> Dual Race Arena
+      </button>
+      <button class="nav-btn" data-tab="theory-hub">
+        <i class="fa-solid fa-graduation-cap"></i> DAA Theory & Complexity
+      </button>
+      <button class="nav-btn" data-tab="game-mode">
+        <i class="fa-solid fa-gamepad"></i> Sorting Challenge
+      </button>
+    </nav>
+
+    <!-- Global Controls (Audio, Volume) -->
+    <div class="header-actions">
+      <button id="sound-toggle-btn" class="icon-btn" title="Toggle Sound Feedback (M)">
+        <i class="fa-solid fa-volume-high"></i>
+      </button>
+      <div class="volume-container">
+        <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.2" title="Audio Volume">
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="main-container">
+    
+    <!-- ==================== TAB 1: VISUALIZER STUDIO ==================== -->
+    <section id="single-view" class="tab-content active">
+      <!-- Top Controls Bar -->
+      <div class="controls-card">
+        <div class="control-group">
+          <label for="algorithm-select"><i class="fa-solid fa-microchip"></i> Algorithm</label>
+          <select id="algorithm-select" class="custom-select">
+            <optgroup label="Divide & Conquer / Sorting - O(n log n)">
+              <option value="quick" selected>Quick Sort (Lomuto Partition)</option>
+              <option value="merge">Merge Sort</option>
+              <option value="heap">Heap Sort</option>
+            </optgroup>
+            <optgroup label="Comparison Sorts - O(n²)">
+              <option value="bubble">Bubble Sort</option>
+              <option value="selection">Selection Sort</option>
+              <option value="insertion">Insertion Sort</option>
+            </optgroup>
+            <optgroup label="Greedy Graph Algorithms (DAA)">
+              <option value="dijkstra">Dijkstra's Shortest Path</option>
+              <option value="prims">Prim's Minimum Spanning Tree (MST)</option>
+              <option value="kruskal">Kruskal's MST (Edge Sorting + DSU)</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="control-group" id="array-size-group">
+          <label for="array-size-slider"><i class="fa-solid fa-bars"></i> Size: <span id="array-size-val">30</span></label>
+          <input type="range" id="array-size-slider" min="10" max="80" value="30">
+        </div>
+
+        <div class="control-group">
+          <label for="speed-slider"><i class="fa-solid fa-gauge-high"></i> Speed: <span id="speed-val">50x</span></label>
+          <input type="range" id="speed-slider" min="1" max="100" value="50">
+        </div>
+
+        <div class="control-group" id="array-type-group">
+          <label for="array-type-select"><i class="fa-solid fa-shuffle"></i> Distribution</label>
+          <select id="array-type-select" class="custom-select">
+            <option value="random" selected>Random</option>
+            <option value="nearly-sorted">Nearly Sorted</option>
+            <option value="reversed">Reverse Sorted (Worst Case)</option>
+            <option value="few-unique">Few Unique (Duplicates)</option>
+            <option value="pyramid">Pyramid / Mountain</option>
+          </select>
+        </div>
+
+        <div class="button-group">
+          <button id="generate-btn" class="btn btn-secondary">
+            <i class="fa-solid fa-rotate-right"></i> New Data
+          </button>
+          <button id="custom-input-btn" class="btn btn-outline">
+            <i class="fa-solid fa-pen"></i> Custom
+          </button>
+        </div>
+      </div>
+
+      <!-- Playback Actions Toolbar -->
+      <div class="playback-bar">
+        <button id="step-prev-btn" class="btn btn-control" title="Step Backwards (Left Arrow)">
+          <i class="fa-solid fa-backward-step"></i> Step Prev
+        </button>
+        <button id="play-btn" class="btn btn-primary btn-lg" title="Play/Pause (Space)">
+          <i class="fa-solid fa-play"></i> Start Execution
+        </button>
+        <button id="step-next-btn" class="btn btn-control" title="Step Forwards (Right Arrow)">
+          <i class="fa-solid fa-forward-step"></i> Step Next
+        </button>
+        <button id="reset-btn" class="btn btn-danger" title="Reset State (R)">
+          <i class="fa-solid fa-rotate-left"></i> Reset
+        </button>
+      </div>
+
+      <!-- Main Visualizer Dashboard Grid -->
+      <div class="visualizer-grid">
+        <!-- Canvas Stage -->
+        <div class="stage-card">
+          <div class="stage-header">
+            <div class="algorithm-badge" id="current-algo-badge">
+              <span class="algo-title">Quick Sort</span>
+              <span class="algo-complexity">O(n log n)</span>
+            </div>
+            
+            <!-- Dynamic Pointers Legend & Indicator -->
+            <div class="pointer-legend-bar" id="pointer-legend">
+              <span class="pointer-badge badge-low"><i class="fa-solid fa-arrow-down"></i> low</span>
+              <span class="pointer-badge badge-high"><i class="fa-solid fa-arrow-down"></i> high</span>
+              <span class="pointer-badge badge-mid"><i class="fa-solid fa-arrow-down"></i> mid</span>
+              <span class="pointer-badge badge-pivot"><i class="fa-solid fa-arrow-down"></i> pivot</span>
+              <span class="pointer-badge badge-i"><i class="fa-solid fa-arrow-down"></i> i</span>
+              <span class="pointer-badge badge-j"><i class="fa-solid fa-arrow-down"></i> j</span>
+            </div>
+          </div>
+          
+          <div class="canvas-wrapper">
+            <canvas id="main-canvas"></canvas>
+          </div>
+          
+          <div class="metrics-overlay">
+            <div class="metric-box">
+              <span class="metric-label" id="lbl-metric-1">Comparisons</span>
+              <span class="metric-value" id="metric-comparisons">0</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-label" id="lbl-metric-2">Swaps / Operations</span>
+              <span class="metric-value" id="metric-swaps">0</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-label">Time Elapsed</span>
+              <span class="metric-value" id="metric-time">0 ms</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-label">Step Progress</span>
+              <span class="metric-value" id="metric-steps">0 / 0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar: Pseudocode & Explainer -->
+        <div class="sidebar-card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-code"></i> Execution Trace & Code</h3>
+          </div>
+          <div class="pseudocode-container" id="pseudocode-box">
+            <!-- Pseudocode lines rendered dynamically -->
+          </div>
+          <div class="step-explanation-box">
+            <div class="explainer-title"><i class="fa-solid fa-circle-info"></i> Current Operation</div>
+            <div class="explainer-text" id="step-explanation">Ready to begin algorithm execution. Click 'Start Execution' or step through.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: DUAL RACE ARENA ==================== -->
+    <section id="dual-race" class="tab-content">
+      <div class="race-controls-card">
+        <div class="race-setup">
+          <div class="racer-select-group">
+            <label class="racer-label racer-1-color"><i class="fa-solid fa-microchip"></i> Algorithm A</label>
+            <select id="race-algo-1" class="custom-select">
+              <optgroup label="Divide & Conquer / Sorting">
+                <option value="quick" selected>Quick Sort (O(n log n))</option>
+                <option value="merge">Merge Sort (O(n log n))</option>
+                <option value="heap">Heap Sort (O(n log n))</option>
+              </optgroup>
+              <optgroup label="Comparison Sorts - O(n²)">
+                <option value="bubble">Bubble Sort (O(n²))</option>
+                <option value="insertion">Insertion Sort (O(n²))</option>
+                <option value="selection">Selection Sort (O(n²))</option>
+              </optgroup>
+              <optgroup label="Greedy Graph Algorithms">
+                <option value="dijkstra">Dijkstra's Shortest Path</option>
+                <option value="prims">Prim's MST Algorithm</option>
+                <option value="kruskal">Kruskal's MST (Edge Sort + DSU)</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div class="vs-divider">VS</div>
+
+          <div class="racer-select-group">
+            <label class="racer-label racer-2-color"><i class="fa-solid fa-microchip"></i> Algorithm B</label>
+            <select id="race-algo-2" class="custom-select">
+              <optgroup label="Divide & Conquer / Sorting">
+                <option value="quick">Quick Sort (O(n log n))</option>
+                <option value="merge">Merge Sort (O(n log n))</option>
+                <option value="heap">Heap Sort (O(n log n))</option>
+              </optgroup>
+              <optgroup label="Comparison Sorts - O(n²)">
+                <option value="bubble" selected>Bubble Sort (O(n²))</option>
+                <option value="insertion">Insertion Sort (O(n²))</option>
+                <option value="selection">Selection Sort (O(n²))</option>
+              </optgroup>
+              <optgroup label="Greedy Graph Algorithms">
+                <option value="dijkstra">Dijkstra's Shortest Path</option>
+                <option value="prims" selected>Prim's MST Algorithm</option>
+                <option value="kruskal">Kruskal's MST (Edge Sort + DSU)</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <div class="race-config">
+          <div class="control-group">
+            <label for="race-size-slider">Array Size: <span id="race-size-val">35</span></label>
+            <input type="range" id="race-size-slider" min="15" max="70" value="35">
+          </div>
+          <div class="control-group">
+            <label for="race-speed-slider">Race Speed: <span id="race-speed-val">60x</span></label>
+            <input type="range" id="race-speed-slider" min="1" max="100" value="60">
+          </div>
+          <button id="race-start-btn" class="btn btn-primary btn-lg">
+            <i class="fa-solid fa-flag-checkered"></i> Start Race!
+          </button>
+          <button id="race-reset-btn" class="btn btn-danger">
+            <i class="fa-solid fa-rotate-left"></i> Reset Arena
+          </button>
+        </div>
+      </div>
+
+      <!-- Dual Stage Layout -->
+      <div class="dual-stage-container">
+        <!-- Racer 1 Stage -->
+        <div class="stage-card racer-card" id="racer-card-1">
+          <div class="racer-header">
+            <h3 id="racer-1-name">Quick Sort</h3>
+            <span class="winner-badge" id="winner-badge-1"><i class="fa-solid fa-trophy"></i> WINNER!</span>
+          </div>
+          <div class="canvas-wrapper">
+            <canvas id="race-canvas-1"></canvas>
+          </div>
+          <div class="race-stats-grid">
+            <div class="stat-pill"><span class="stat-lbl">Comparisons</span><span class="stat-val" id="race-1-comp">0</span></div>
+            <div class="stat-pill"><span class="stat-lbl">Swaps / Writes</span><span class="stat-val" id="race-1-swaps">0</span></div>
+            <div class="stat-pill"><span class="stat-lbl">Time Taken</span><span class="stat-val" id="race-1-time">0 ms</span></div>
+          </div>
+        </div>
+
+        <!-- Racer 2 Stage -->
+        <div class="stage-card racer-card" id="racer-card-2">
+          <div class="racer-header">
+            <h3 id="racer-2-name">Bubble Sort</h3>
+            <span class="winner-badge" id="winner-badge-2"><i class="fa-solid fa-trophy"></i> WINNER!</span>
+          </div>
+          <div class="canvas-wrapper">
+            <canvas id="race-canvas-2"></canvas>
+          </div>
+          <div class="race-stats-grid">
+            <div class="stat-pill"><span class="stat-lbl">Comparisons</span><span class="stat-val" id="race-2-comp">0</span></div>
+            <div class="stat-pill"><span class="stat-lbl">Swaps / Writes</span><span class="stat-val" id="race-2-swaps">0</span></div>
+            <div class="stat-pill"><span class="stat-lbl">Time Taken</span><span class="stat-val" id="race-2-time">0 ms</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: DAA THEORY HUB ==================== -->
+    <section id="theory-hub" class="tab-content">
+      <div class="theory-grid">
+        <!-- Master Algorithm Matrix -->
+        <div class="theory-card full-width">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-table-list"></i> Comprehensive DAA Algorithm Matrix</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="daa-table">
+              <thead>
+                <tr>
+                  <th>Algorithm</th>
+                  <th>Best Case</th>
+                  <th>Average Case</th>
+                  <th>Worst Case</th>
+                  <th>Space Complexity</th>
+                  <th>Stability / Structure</th>
+                  <th>In-Place?</th>
+                  <th>Algorithmic Paradigm</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Quick Sort</strong></td>
+                  <td><span class="tag tag-green">O(n log n)</span></td>
+                  <td><span class="tag tag-green">O(n log n)</span></td>
+                  <td><span class="tag tag-red">O(n²)</span></td>
+                  <td><span class="tag tag-blue">O(log n)</span></td>
+                  <td><span class="tag tag-no">Unstable</span></td>
+                  <td><span class="tag tag-yes">Yes</span></td>
+                  <td>Divide & Conquer</td>
+                </tr>
+                <tr>
+                  <td><strong>Merge Sort</strong></td>
+                  <td><span class="tag tag-green">O(n log n)</span></td>
+                  <td><span class="tag tag-green">O(n log n)</span></td>
+                  <td><span class="tag tag-green">O(n log n)</span></td>
+                  <td><span class="tag tag-orange">O(n)</span></td>
+                  <td><span class="tag tag-yes">Stable</span></td>
+                  <td><span class="tag tag-no">No</span></td>
+                  <td>Divide & Conquer</td>
+                </tr>
+                <tr>
+                  <td><strong>Heap Sort</strong></td>
+                  <td><span class="tag tag-green">O(n log n)</span></td>
+                  <td><span class="tag tag-green">O(n log n)</span></td>
+                  <td><span class="tag tag-green">O(n log n)</span></td>
+                  <td><span class="tag tag-green">O(1)</span></td>
+                  <td><span class="tag tag-no">Unstable</span></td>
+                  <td><span class="tag tag-yes">Yes</span></td>
+                  <td>Selection & Binary Heap</td>
+                </tr>
+                <tr>
+                  <td><strong>Insertion Sort</strong></td>
+                  <td><span class="tag tag-green">O(n)</span></td>
+                  <td><span class="tag tag-red">O(n²)</span></td>
+                  <td><span class="tag tag-red">O(n²)</span></td>
+                  <td><span class="tag tag-green">O(1)</span></td>
+                  <td><span class="tag tag-yes">Stable</span></td>
+                  <td><span class="tag tag-yes">Yes</span></td>
+                  <td>Incremental</td>
+                </tr>
+                <tr>
+                  <td><strong>Selection Sort</strong></td>
+                  <td><span class="tag tag-red">O(n²)</span></td>
+                  <td><span class="tag tag-red">O(n²)</span></td>
+                  <td><span class="tag tag-red">O(n²)</span></td>
+                  <td><span class="tag tag-green">O(1)</span></td>
+                  <td><span class="tag tag-no">Unstable</span></td>
+                  <td><span class="tag tag-yes">Yes</span></td>
+                  <td>Greedy Selection</td>
+                </tr>
+                <tr>
+                  <td><strong>Bubble Sort</strong></td>
+                  <td><span class="tag tag-green">O(n)</span></td>
+                  <td><span class="tag tag-red">O(n²)</span></td>
+                  <td><span class="tag tag-red">O(n²)</span></td>
+                  <td><span class="tag tag-green">O(1)</span></td>
+                  <td><span class="tag tag-yes">Stable</span></td>
+                  <td><span class="tag tag-yes">Yes</span></td>
+                  <td>Brute Force Comparison</td>
+                </tr>
+                <tr class="row-highlight">
+                  <td><strong>Dijkstra's Shortest Path</strong></td>
+                  <td><span class="tag tag-green">O((V+E) log V)</span></td>
+                  <td><span class="tag tag-green">O((V+E) log V)</span></td>
+                  <td><span class="tag tag-green">O((V+E) log V)</span></td>
+                  <td><span class="tag tag-blue">O(V)</span></td>
+                  <td>Single Source Path</td>
+                  <td><span class="tag tag-yes">Graph</span></td>
+                  <td>Greedy + Min-Heap</td>
+                </tr>
+                <tr class="row-highlight">
+                  <td><strong>Prim's MST Algorithm</strong></td>
+                  <td><span class="tag tag-green">O(E log V)</span></td>
+                  <td><span class="tag tag-green">O(E log V)</span></td>
+                  <td><span class="tag tag-green">O(E log V)</span></td>
+                  <td><span class="tag tag-blue">O(V + E)</span></td>
+                  <td>Spanning Tree</td>
+                  <td><span class="tag tag-yes">Graph</span></td>
+                  <td>Greedy + Min-Heap</td>
+                </tr>
+                <tr class="row-highlight">
+                  <td><strong>Kruskal's MST Algorithm</strong></td>
+                  <td><span class="tag tag-green">O(E log E)</span></td>
+                  <td><span class="tag tag-green">O(E log E)</span></td>
+                  <td><span class="tag tag-green">O(E log E)</span></td>
+                  <td><span class="tag tag-blue">O(V + E)</span></td>
+                  <td>Edge Sorting + DSU</td>
+                  <td><span class="tag tag-yes">Graph</span></td>
+                  <td>Greedy + Disjoint Sets</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Recurrence Relations & Proofs -->
+        <div class="theory-card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-square-root-variable"></i> Master Theorem & Recurrences</h3>
+          </div>
+          <div class="theory-content">
+            <div class="formula-box">
+              <span class="formula-title">MergeSort Recurrence:</span>
+              <div class="math-expr">T(n) = 2 T(n / 2) + \Theta(n)</div>
+              <p>By Master Theorem Case 2: \(a = 2, b = 2, f(n) = \Theta(n)\). Solution: <strong>\(\Theta(n \log n)\)</strong>.</p>
+            </div>
+            
+            <div class="formula-box mt-3">
+              <span class="formula-title">QuickSort Partitioning Recurrence:</span>
+              <div class="math-expr">T(n) = T(k) + T(n - k - 1) + \Theta(n)</div>
+              <p>Best Case (\(k = n/2\)): \(T(n) = 2T(n/2) + \Theta(n) \implies O(n \log n)\)</p>
+              <p>Worst Case (\(k = 0\)): \(T(n) = T(n-1) + \Theta(n) \implies O(n^2)\)</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Graph Algorithm Paradigm -->
+        <div class="theory-card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-diagram-project"></i> Greedy Graph Paradigms</h3>
+          </div>
+          <div class="theory-content">
+            <p><strong>Kruskal's MST</strong> sorts all graph edges by weight using Quick/Heap Sort, then uses <em>Disjoint Set Union (DSU)</em> with Path Compression to build the MST without cycles.</p>
+            <p class="mt-2"><strong>Prim's MST</strong> grows a single tree by repeatedly picking the minimum-weight edge connecting the tree to an unvisited vertex using a <em>Min-Priority Queue</em>.</p>
+            <p class="mt-2"><strong>Dijkstra's Shortest Path</strong> computes shortest paths from a single source by greedily relaxing edges \(d[u] + w(u,v) < d[v]\).</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: SORTING CHALLENGE GAME ==================== -->
+    <section id="game-mode" class="tab-content">
+      <div class="game-container">
+        <div class="game-header-card">
+          <div class="game-title-group">
+            <h2><i class="fa-solid fa-trophy"></i> Human vs Algorithm Challenge</h2>
+            <p>Sort the elements manually with the minimum number of swaps and comparisons!</p>
+          </div>
+          <div class="game-score-board">
+            <div class="score-pill"><span class="lbl">Score</span><span class="val" id="game-score">0</span></div>
+            <div class="score-pill"><span class="lbl">Swaps</span><span class="val" id="game-swaps">0</span></div>
+            <div class="score-pill"><span class="lbl">Time</span><span class="val" id="game-timer">00:00</span></div>
+            <button id="start-game-btn" class="btn btn-primary"><i class="fa-solid fa-play"></i> New Challenge</button>
+          </div>
+        </div>
+
+        <div class="game-board-card">
+          <p class="game-instruction" id="game-instruction">Click on any two numbers to swap their positions until the entire sequence is sorted in ascending order!</p>
+          <div class="game-bars-container" id="game-bars-wrapper">
+            <!-- Game interactive cards generated here -->
+          </div>
+          <div id="game-success-message" class="game-success hidden">
+            <i class="fa-solid fa-circle-check"></i>
+            <h3>ARRAY SORTED SUCCESSFULLY!</h3>
+            <p id="game-result-summary">You completed the challenge in 14 seconds with 8 swaps!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Custom Array Input Modal -->
+  <div id="custom-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-pen-to-square"></i> Enter Custom Array</h3>
+        <button id="close-modal-btn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Enter comma-separated integers (values between 5 and 100):</p>
+        <textarea id="custom-array-input" placeholder="e.g. 45, 12, 89, 34, 2, 67, 90, 23, 55, 10"></textarea>
+        <div class="modal-error hidden" id="modal-error">Invalid input! Please enter valid comma-separated numbers.</div>
+      </div>
+      <div class="modal-footer">
+        <button id="apply-custom-btn" class="btn btn-primary">Apply Custom Array</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main JavaScript Modules -->
+  <script src="audio.js"></script>
+  <script src="algorithms.js"></script>
+  <script src="visualizer.js"></script>
+  <script src="theory.js"></script>
+  <script src="game.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

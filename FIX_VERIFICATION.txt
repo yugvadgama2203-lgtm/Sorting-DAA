@@ -1,0 +1,10 @@
+Sorting Project - Fix Verification
+==================================
+JavaScript files are loaded from the same directory as index.html.
+
+audio.js: OK
+algorithms.js: OK
+visualizer.js: OK
+theory.js: OK
+game.js: OK
+app.js: OK
